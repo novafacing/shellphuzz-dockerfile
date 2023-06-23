@@ -23,8 +23,10 @@ def hexescape(s):
             if not isinstance(c, int):
                 c = ord(c)
             out.append("\\x%02x" % c)
-        else:
+        elif isinstance(c, str):
             out.append(c)
+        elif isinstance(c, int):
+            out.append(ord(c))
 
     return "".join(out)
 
