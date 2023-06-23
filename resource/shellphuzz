@@ -4,7 +4,6 @@ import os
 import sys
 import imp
 import time
-import shlex
 import fuzzer
 import shutil
 import socket
@@ -34,8 +33,6 @@ if __name__ == "__main__":
     parser.add_argument('--run-timeout', help="Number of seconds permitted for each run of binary", type=int)
     parser.add_argument('--driller-timeout', help="Number of seconds to allow driller to run", type=int, default=10*60)
     parser.add_argument('--length-extension', help="Try extending inputs to driller by this many bytes", type=int)
-    parser.add_argument('--target-opts', help="extra options to pass to the target")
-    parser.add_argument('--extra-opts', help="extra options to pass to AFL when starting up")
     args = parser.parse_args()
 
     if os.path.isfile(os.path.join(os.getcwd(), args.logcfg)):
@@ -88,7 +85,6 @@ if __name__ == "__main__":
         args.binary, args.work_dir, afl_count=args.afl_cores, force_interval=args.force_interval,
         create_dictionary=not args.no_dictionary, stuck_callback=stuck_callback, time_limit=args.timeout,
         memory=args.memory, seeds=seeds, timeout=args.run_timeout,
-        target_opts=shlex.split(args.target_opts), extra_opts=args.extra_opts,
     )
 
     # start it!

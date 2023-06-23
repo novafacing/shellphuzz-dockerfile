@@ -20,7 +20,9 @@ def hexescape(s):
     acceptable = (string.ascii_letters + string.digits + " .").encode()
     for c in s:
         if c not in acceptable:
-            out.append("\\x%02x" % ord(c))
+            if not isinstance(c, int):
+                c = ord(c)
+            out.append("\\x%02x" % c)
         else:
             out.append(c)
 
@@ -31,7 +33,6 @@ strcnt = itertools.count()
 
 
 def create(binary):
-
     b = angr.Project(binary, load_options={"auto_load_libs": False})
     cfg = b.analyses.CFG(resolve_indirect_jumps=True, collect_data_references=True)
 
@@ -63,7 +64,6 @@ def create(binary):
 
 
 def main(argv):
-
     if len(argv) < 2:
         l.error("incorrect number of arguments passed to create_dict")
         print("usage: %s [binary1] [binary2] [binary3] ... " % sys.argv[0])
