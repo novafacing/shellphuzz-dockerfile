@@ -33,6 +33,7 @@ RUN apt-get -y update && \
     pkg-config \
     python3 \
     python3-pip \
+    python3-setuptools \
     python3-virtualenv \
     software-properties-common \
     unzip \
@@ -58,10 +59,12 @@ RUN sed -i 's#"aarch64", "x86_64", "i386", "arm", "ppc", "ppc64", "mips", "mipse
     python3 setup.py build &&\
     python3 setup.py install
 
-RUN python3 -m pip install -U pip &&\
-    python3 -m pip install -U git+https://github.com/shellphish/fuzzer &&\
-    python3 -m pip install -U git+https://github.com/shellphish/driller &&\
-    python3 -m pip install -U git+https://github.com/angr/tracer &&\
+RUN python3 -m pip install z3-solver==4.12.1 && \
+    python3 -m pip install wcwidth==0.1.7 && \
+    python3 -m pip install bitstring==3.1.6 && \
+    python3 -m pip install git+https://github.com/novafacing/fuzzer &&\
+    python3 -m pip install git+https://github.com/novafacing/driller &&\
+    python3 -m pip install git+https://github.com/angr/tracer &&\
     cp -R -v /shellphish-afl/bin/afl-unix /usr/bin/
 
 COPY resource/shellphuzz /usr/local/bin/shellphuzz
@@ -69,16 +72,22 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 
 RUN sed -i 's/if not "core" in f.read():/if f.read().startswith("|"):/' /usr/local/lib/python3.5/dist-packages/fuzzer/fuzzer.py
 
-WORKDIR /T-Fuzz
-RUN python3 -m pip install -U pip &&\
-    cd T-Fuzz && sed -i 's/shellphish-afl==1.1//g' req.txt &&\
-    python3 -m pip install -r req.txt &&\
-    python3 -m pip install -U git+https://github.com/shellphish/fuzzer.git
+# WORKDIR /T-Fuzz
+# RUN sed -i 's/shellphish-afl==1.1//g' req.txt &&\
+#     python3 -m pip install -r req.txt
 
 COPY resource/create_dict.py /usr/local/bin/create_dict.py
 COPY resource/tfuzz_sys.py /T-Fuzz/tfuzz/tfuzz_sys.py
 COPY resource/issue14.patch /T-Fuzz/issue14.patch
-RUN git apply issue14.patch
 
-RUN sed -i 's/if not "core" in f.read():/if f.read().startswith("|"):/' /usr/local/lib/python2.7/dist-packages/fuzzer/fuzzer.py
+RUN python3 -m pip uninstall unicorn && \
+    python3 -m pip install unicorn==1.0.2rc1 && \
+    python3 -m pip uninstall pysmt && \
+    python3 -m pip install pysmt==0.8.0 && \
+    python3 -m pip uninstall pefile && \
+    python3 -m pip install pefile==2019.4.18 && \
+
+# RUN git apply issue14.patch
+
+# RUN sed -i 's/if not "core" in f.read():/if f.read().startswith("|"):/' /usr/local/lib/python2.7/dist-packages/fuzzer/fuzzer.py
 
